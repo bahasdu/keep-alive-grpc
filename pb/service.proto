@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package pb;
+option go_package = "bahasdu/pb";
+
+message Request {
+}
+
+message Response {
+    string text = 1;
+}
+
+service MyService {
+    rpc SendRequest (Request) returns (Response) {}
+}
