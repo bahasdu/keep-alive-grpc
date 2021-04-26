@@ -1,4 +1,4 @@
-module keep-alive-grpc
+module github.com/bahasdu/keep-alive-grpc
 
 go 1.15
 

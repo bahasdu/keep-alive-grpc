@@ -1,26 +1,27 @@
 package main
 
 import (
+	"fmt"
+	"github.com/bahasdu/keep-alive-grpc/pb"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
-	"keep-alive-grpc/pb"
 	"log"
 	"net"
-	// replace this with your own project
+	"sync/atomic"
 )
 
-var counter int = 0
+var counter uint64
 
-func (s *server) SendRequest(cxt context.Context, r *pb.Request) (*pb.Response, error) {
-	counter++
-	return &pb.Response{Text: string(counter)}, nil
+func (s *Server) SendRequest(context.Context, *pb.Request) (*pb.Response, error) {
+	atomic.AddUint64(&counter, 1)
+	fmt.Println(counter)
+	return &pb.Response{Text: fmt.Sprintf("%d", counter)}, nil
 }
 
-func (s *server) mustEmbedUnimplementedMyServiceServer() {
-	panic("implement me")
+type Server struct {
+	// Embed the unimplemented server
+	pb.UnimplementedMyServiceServer
 }
-
-type server struct{}
 
 func main() {
 	lis, err := net.Listen("tcp", ":3000")
@@ -30,6 +31,8 @@ func main() {
 
 	var opts []grpc.ServerOption
 	grpcServer := grpc.NewServer(opts...)
-	pb.RegisterMyServiceServer(grpcServer, &server{})
+	s := Server{}
+	pb.RegisterMyServiceServer(grpcServer, &s)
+
 	grpcServer.Serve(lis)
 }
